@@ -21,29 +21,29 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 缓存预热任务
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ * 该类负责定时执行缓存预热操作，特别是对推荐用户的缓存进行预热
  */
 @Component
 @Slf4j
 public class PreCacheJob {
 
     @Resource
-    private UserService userService;
+    private UserService userService; // 用户服务，用于获取用户数据
 
     @Resource
-    private RedisTemplate<String, Object> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate; // Redis模板，用于操作Redis缓存
 
     @Resource
-    private RedissonClient redissonClient;
+    private RedissonClient redissonClient; // Redisson客户端，用于分布式锁
 
-    // 重点用户
+    // 重点用户列表，这些用户的推荐数据会被优先缓存
     private List<Long> mainUserList = Arrays.asList(1L);
 
     // 每天执行，预热推荐用户
+    // 定时任务配置为每天凌晨0点31分执行
     @Scheduled(cron = "0 31 0 * * *")
     public void doCacheRecommendUser() {
+        // 创建分布式锁，确保同一时间只有一个线程执行缓存预热
         RLock lock = redissonClient.getLock("yupao:precachejob:docache:lock");
         try {
             // 只有一个线程能获取到锁

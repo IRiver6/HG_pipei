@@ -40,9 +40,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 队伍服务实现类
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 @Service
 public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
@@ -303,23 +300,39 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
     }
 
+/**
+ * 用户退出队伍的方法
+ * @param teamQuitRequest 包含队伍ID的退出请求
+ * @param loginUser 当前登录用户信息
+ * @return 是否成功退出队伍
+ * @throws BusinessException 当参数错误或操作失败时抛出
+ */
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class) // 声明事务，确保方法内所有操作要么全部成功，要么全部回滚
     public boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser) {
+    // 检查请求参数是否为空
         if (teamQuitRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+    // 获取请求中的队伍ID
         Long teamId = teamQuitRequest.getTeamId();
+    // 根据ID获取队伍信息
         Team team = getTeamById(teamId);
+    // 获取当前登录用户的ID
         long userId = loginUser.getId();
+    // 创建用户队伍查询条件
         UserTeam queryUserTeam = new UserTeam();
         queryUserTeam.setTeamId(teamId);
         queryUserTeam.setUserId(userId);
+    // 构建查询包装器
         QueryWrapper<UserTeam> queryWrapper = new QueryWrapper<>(queryUserTeam);
+    // 查询用户是否已加入该队伍
         long count = userTeamService.count(queryWrapper);
+    // 如果用户未加入队伍，抛出异常
         if (count == 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "未加入队伍");
         }
+    // 查询队伍当前成员数量
         long teamHasJoinNum = this.countTeamUserByTeamId(teamId);
         // 队伍只剩一人，解散
         if (teamHasJoinNum == 1) {

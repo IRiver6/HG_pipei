@@ -6,17 +6,17 @@ import java.util.List;
 
 /**
  * 导入 Excel
- *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ * 该类用于实现Excel文件导入功能，提供了两种读取Excel数据的方式：监听器读取和同步读取
  */
 public class ImportExcel {
 
     /**
      * 读取数据
+     * 程序入口方法，用于测试Excel读取功能
+     * @param args 命令行参数
      */
     public static void main(String[] args) {
-        // todo 记得改为自己的测试文件
+        // todo 改测试文件
         String fileName = "E:\\星球项目\\yupao-backend\\src\\main\\resources\\testExcel.xlsx";
 //        readByListener(fileName);
         synchronousRead(fileName);
@@ -24,22 +24,21 @@ public class ImportExcel {
 
     /**
      * 监听器读取
-     *
-     * @param fileName
+     * 使用EasyExcel的监听器模式读取Excel文件，适用于大数据量读取
+     * @param fileName Excel文件路径
      */
     public static void readByListener(String fileName) {
+        // EasyExcel读取Excel文件，指定实体类为XingQiuTableUserInfo，使用自定义的TableListener监听器
         EasyExcel.read(fileName, XingQiuTableUserInfo.class, new TableListener()).sheet().doRead();
     }
 
-    // [加入我们](https://yupi.icu) 从 0 到 1 项目实战，经验拉满！10+ 原创项目手把手教程、7 日项目提升训练营、1000+ 项目经验笔记、60+ 编程经验分享直播
-
     /**
      * 同步读
-     *
-     * @param fileName
+     * 使用EasyExcel的同步模式读取Excel文件，一次性读取所有数据到内存
+     * @param fileName Excel文件路径
      */
     public static void synchronousRead(String fileName) {
-        // 这里 需要指定读用哪个class去读，然后读取第一个sheet 同步读取会自动finish
+        // 指定读用哪个class去读，然后读取第一个sheet 同步读取会自动finish
         List<XingQiuTableUserInfo> totalDataList =
                 EasyExcel.read(fileName).head(XingQiuTableUserInfo.class).sheet().doReadSync();
         for (XingQiuTableUserInfo xingQiuTableUserInfo : totalDataList) {
